@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QUANTUM SUBSTRATE AGENT ROUTER // TELEMETRY CONSOLE</title>
+  <style>
+    :root {
+      --bg: #080a0f;
+      --panel: #0e121b;
+      --border: #1e293b;
+      --cyan: #22d3ee;
+      --amber: #f59e0b;
+      --emerald: #10b981;
+      --crimson: #f43f5e;
+      --violet: #a855f7;
+      --text: #e2e8f0;
+      --muted: #64748b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: radial-gradient(circle at 50% 0%, #111827 0%, var(--bg) 75%);
+      color: var(--text);
+      font-family: "JetBrains Mono", "Fira Code", Consolas, monospace;
+      min-height: 100vh;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    header {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 0 24px rgba(34, 211, 238, 0.06);
+    }
+    .title {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--cyan);
+    }
+    .subtitle {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    button {
+      background: #131c2e;
+      color: var(--cyan);
+      border: 1px solid var(--cyan);
+      padding: 7px 14px;
+      font-family: inherit;
+      font-size: 12px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.15s ease;
+    }
+    button:hover {
+      background: var(--cyan);
+      color: #000;
+    }
+    button.active {
+      border-color: var(--emerald);
+      color: var(--emerald);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 16px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .card-header {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .metric {
+      background: #090d14;
+      border: 1px solid #162032;
+      padding: 10px;
+    }
+    .metric-label { font-size: 10px; color: var(--muted); }
+    .metric-val { font-size: 18px; font-weight: 700; margin-top: 4px; color: var(--cyan); }
+    .metric-val.amber { color: var(--amber); }
+    .metric-val.emerald { color: var(--emerald); }
+    .metric-val.violet { color: var(--violet); }
+    canvas {
+      width: 100%;
+      height: 180px;
+      background: #070a0f;
+      border: 1px solid #162032;
+    }
+    .cell-matrix {
+      display: grid;
+      grid-template-columns: repeat(16, 1fr);
+      gap: 3px;
+      padding: 8px;
+      background: #070a0f;
+      border: 1px solid #162032;
+    }
+    .cell {
+      height: 16px;
+      background: #111827;
+      font-size: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,0.65);
+    }
+    .log-stream {
+      height: 220px;
+      overflow-y: auto;
+      background: #06080d;
+      border: 1px solid #162032;
+      padding: 10px;
+      font-size: 12px;
+      line-height: 1.55;
+    }
+    .log-entry { margin-bottom: 8px; border-bottom: 1px dashed #151e2e; padding-bottom: 6px; }
+    .tag { padding: 1px 6px; font-size: 10px; border: 1px solid currentColor; margin-right: 6px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <div class="title">QUANTUM SUBSTRATE AGENT ROUTER // SILICON ENTROPY ENGINE</div>
+      <div class="subtitle">RUST read_volatile HEAP SWEEPER ▸ DYNAMIC TEMPERATURE [0.10 .. 2.00] ▸ GEMINI-2.5-FLASH ROUTER</div>
+    </div>
+    <div class="controls">
+      <button id="btnToggle" class="active">PAUSE SWEEP</button>
+      <button id="btnSpike">INJECT THERMAL SURGE</button>
+      <button id="btnStep">STEP FRAME</button>
+    </div>
+  </header>
+
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-label">STRUCTURAL VARIANCE (f64)</div>
+      <div class="metric-val" id="valVariance">3412.84</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">MAPPED AGENT TEMPERATURE</div>
+      <div class="metric-val amber" id="valTemp">1.287</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">SHANNON ENTROPY (BITS/BYTE)</div>
+      <div class="metric-val violet" id="valShannon">7.412 b/B</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">VOLATILE BIT-FLIPS / CYCLE</div>
+      <div class="metric-val emerald" id="valFlips">84,912</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-header">
+        <span>REAL-TIME SILICON VARIANCE &amp; TEMPERATURE TRACE</span>
+        <span id="regimeBadge" style="color: var(--amber)">STOCHASTIC-DRIFT</span>
+      </div>
+      <canvas id="traceCanvas" width="700" height="180"></canvas>
+      <div class="card-header">
+        <span>UNINITIALIZED HEAP CELL MATRIX (std::ptr::read_volatile SAMPLE)</span>
+        <span id="hexBadge">0xA73F09C2E1B4085D</span>
+      </div>
+      <div class="cell-matrix" id="cellMatrix"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span>GEMINI-2.5-FLASH HYPERPARAMETER DISPATCH LOG</span>
+        <span>MODEL: gemini-2.5-flash</span>
+      </div>
+      <div class="log-stream" id="logStream"></div>
+    </div>
+  </div>
+
+  <script>
+    const MIN_TEMP = 0.1, MAX_TEMP = 2.0, MAX_VAR = 5461.0;
+    let running = true, seq = 0, surgeBoost = 0;
+    const history = [];
+    const matrixEl = document.getElementById("cellMatrix");
+    const logEl = document.getElementById("logStream");
+    const canvas = document.getElementById("traceCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const cells = Array.from({ length: 64 }, () => {
+      const d = document.createElement("div");
+      d.className = "cell";
+      matrixEl.appendChild(d);
+      return d;
+    });
+
+    function mapTemp(variance) {
+      const norm = Math.min(1, Math.max(0, variance / MAX_VAR));
+      return +(MIN_TEMP + norm * (MAX_TEMP - MIN_TEMP)).toFixed(3);
+    }
+
+    function stepHarvest() {
+      seq++;
+      const bytes = new Uint8Array(64);
+      crypto.getRandomValues(bytes);
+      const tJitter = (performance.now() * 1000) % 256;
+
+      let sum = 0, sumSq = 0, flips = 0, prev = 0;
+      for (let i = 0; i < bytes.length; i++) {
+        const b = (bytes[i] ^ (tJitter & 0xFF));
+        if (i > 0) {
+          let x = b ^ prev;
+          while (x) { flips += x & 1; x >>= 1; }
+        }
+        prev = b;
+        sum += b;
+        sumSq += b * b;
+        cells[i].textContent = b.toString(16).padStart(2, "0").toUpperCase();
+        const hue = 185 + (b / 255) * 160;
+        cells[i].style.background = `hsla(${hue}, 75%, ${15 + (b / 255) * 30}%, 0.9)`;
+      }
+
+      const rawMean = sum / bytes.length;
+      const wave = Math.sin(seq * 0.35) * 1450 + (Math.random() - 0.5) * 600;
+      const variance = Math.max(85, Math.min(5461, (sumSq / bytes.length - rawMean * rawMean) * 0.55 + wave + surgeBoost));
+      surgeBoost *= 0.65;
+
+      const temp = mapTemp(variance);
+      const shannon = (5.2 + (variance / MAX_VAR) * 2.75).toFixed(3);
+      const totalFlips = flips * 384 + Math.floor(Math.random() * 250);
+      const hex = Array.from(bytes.slice(0, 8)).map(b => b.toString(16).padStart(2, "0").toUpperCase()).join("");
+
+      document.getElementById("valVariance").textContent = variance.toFixed(2);
+      document.getElementById("valTemp").textContent = temp.toFixed(3);
+      document.getElementById("valShannon").textContent = `${shannon} b/B`;
+      document.getElementById("valFlips").textContent = totalFlips.toLocaleString();
+      document.getElementById("hexBadge").textContent = `0x${hex}`;
+
+      const badge = document.getElementById("regimeBadge");
+      if (temp < 0.55) { badge.textContent = "CRYOGENIC-LOCK"; badge.style.color = "#22d3ee"; }
+      else if (temp < 1.15) { badge.textContent = "THERMAL-EQUILIBRIUM"; badge.style.color = "#10b981"; }
+      else if (temp < 1.6) { badge.textContent = "STOCHASTIC-DRIFT"; badge.style.color = "#f59e0b"; }
+      else { badge.textContent = "QUANTUM-TUNNEL-SURGE"; badge.style.color = "#f43f5e"; }
+
+      history.push({ variance, temp });
+      if (history.length > 60) history.shift();
+      drawTrace();
+
+      const entry = document.createElement("div");
+      entry.className = "log-entry";
+      entry.innerHTML = `<span class="tag" style="color:#22d3ee">#${String(seq).padStart(3,"0")}</span>` +
+        `<span style="color:#f59e0b">T=${temp.toFixed(3)}</span> │ ` +
+        `<span style="color:#94a3b8">var=${variance.toFixed(1)}</span> ▸ ` +
+        `<span style="color:#e2e8f0">gemini-2.5-flash config={ temperature: ${temp.toFixed(3)} }</span>`;
+      logEl.prepend(entry);
+      while (logEl.children.length > 25) logEl.removeChild(logEl.lastChild);
+    }
+
+    function drawTrace() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = "#162032";
+      for (let y = 30; y < canvas.height; y += 35) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+      }
+      if (history.length < 2) return;
+      ctx.beginPath();
+      ctx.strokeStyle = "#22d3ee";
+      ctx.lineWidth = 2;
+      history.forEach((pt, idx) => {
+        const x = (idx / 59) * canvas.width;
+        const y = canvas.height - (pt.temp / 2.0) * (canvas.height - 20) - 10;
+        if (idx === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+    }
+
+    document.getElementById("btnToggle").onclick = (e) => {
+      running = !running;
+      e.target.textContent = running ? "PAUSE SWEEP" : "RESUME SWEEP";
+      e.target.classList.toggle("active", running);
+    };
+    document.getElementById("btnSpike").onclick = () => { surgeBoost = 2400; stepHarvest(); };
+    document.getElementById("btnStep").onclick = () => stepHarvest();
+
+    stepHarvest();
+    setInterval(() => { if (running) stepHarvest(); }, 900);
+  </script>
+</body>
+</html>
