@@ -145,13 +145,46 @@
     }
     .log-entry { margin-bottom: 8px; border-bottom: 1px dashed #151e2e; padding-bottom: 6px; }
     .tag { padding: 1px 6px; font-size: 10px; border: 1px solid currentColor; margin-right: 6px; }
+    .provider-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .provider-row label {
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    select, input[type="password"], input[type="text"] {
+      background: #090d14;
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 12px;
+      padding: 6px 8px;
+      flex: 1;
+      min-width: 140px;
+    }
+    select:focus, input[type="password"]:focus, input[type="text"]:focus {
+      outline: none;
+      border-color: var(--cyan);
+    }
+    .provider-badge {
+      font-size: 10px;
+      color: var(--emerald);
+      border: 1px solid var(--emerald);
+      padding: 2px 6px;
+    }
   </style>
 </head>
 <body>
   <header>
     <div>
       <div class="title">QUANTUM SUBSTRATE AGENT ROUTER // SILICON ENTROPY ENGINE</div>
-      <div class="subtitle">RUST read_volatile HEAP SWEEPER ▸ DYNAMIC TEMPERATURE [0.10 .. 2.00] ▸ GEMINI-2.5-FLASH ROUTER</div>
+      <div class="subtitle">RUST read_volatile HEAP SWEEPER ▸ DYNAMIC TEMPERATURE [0.10 .. 2.00] ▸ GEMINI / OLLAMA CLOUD ROUTER</div>
     </div>
     <div class="controls">
       <button id="btnToggle" class="active">PAUSE SWEEP</button>
@@ -195,8 +228,23 @@
 
     <div class="card">
       <div class="card-header">
-        <span>GEMINI-2.5-FLASH HYPERPARAMETER DISPATCH LOG</span>
-        <span>MODEL: gemini-2.5-flash</span>
+        <span>AGENT ROUTER HYPERPARAMETER DISPATCH LOG</span>
+        <span class="provider-badge" id="providerBadge">GEMINI</span>
+      </div>
+      <div class="provider-row">
+        <label for="providerSelect">PROVIDER</label>
+        <select id="providerSelect">
+          <option value="gemini" selected>Gemini</option>
+          <option value="ollama">Ollama Cloud</option>
+        </select>
+      </div>
+      <div class="provider-row">
+        <label for="modelSelect">MODEL</label>
+        <select id="modelSelect"></select>
+      </div>
+      <div class="provider-row" id="apiKeyRow" style="display:none">
+        <label for="apiKeyInput">OLLAMA CLOUD API KEY</label>
+        <input type="password" id="apiKeyInput" placeholder="sk-..." autocomplete="off" />
       </div>
       <div class="log-stream" id="logStream"></div>
     </div>
@@ -210,6 +258,63 @@
     const logEl = document.getElementById("logStream");
     const canvas = document.getElementById("traceCanvas");
     const ctx = canvas.getContext("2d");
+
+    // ── Provider / Model configuration ──────────────────────────────
+    const PROVIDER_CONFIG = {
+      gemini: {
+        label: "GEMINI",
+        models: ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash"],
+        needsKey: false
+      },
+      ollama: {
+        label: "OLLAMA CLOUD",
+        models: [
+          "gpt-oss:120b",
+          "deepseek-v3.1:671b",
+          "qwen3-coder:480b",
+          "llama3.3:70b",
+          "gemma3:27b",
+          "phi4:14b",
+          "mistral-large-3:675b",
+          "glm-4.6"
+        ],
+        needsKey: true
+      }
+    };
+
+    const providerSelect = document.getElementById("providerSelect");
+    const modelSelect = document.getElementById("modelSelect");
+    const apiKeyRow = document.getElementById("apiKeyRow");
+    const apiKeyInput = document.getElementById("apiKeyInput");
+    const providerBadge = document.getElementById("providerBadge");
+
+    function refreshModelDropdown() {
+      const provider = providerSelect.value;
+      const cfg = PROVIDER_CONFIG[provider];
+      modelSelect.innerHTML = "";
+      cfg.models.forEach(m => {
+        const opt = document.createElement("option");
+        opt.value = m;
+        opt.textContent = m;
+        modelSelect.appendChild(opt);
+      });
+      apiKeyRow.style.display = cfg.needsKey ? "flex" : "none";
+      providerBadge.textContent = cfg.label;
+      providerBadge.style.color = cfg.needsKey ? "var(--amber)" : "var(--emerald)";
+      providerBadge.style.borderColor = cfg.needsKey ? "var(--amber)" : "var(--emerald)";
+    }
+
+    providerSelect.addEventListener("change", refreshModelDropdown);
+    refreshModelDropdown();
+
+    function getSelectedModel() {
+      return modelSelect.value || "gemini-2.5-flash";
+    }
+
+    function getApiKey() {
+      return apiKeyInput.value.trim();
+    }
+    // ────────────────────────────────────────────────────────────────
 
     const cells = Array.from({ length: 64 }, () => {
       const d = document.createElement("div");
@@ -275,7 +380,7 @@
       entry.innerHTML = `<span class="tag" style="color:#22d3ee">#${String(seq).padStart(3,"0")}</span>` +
         `<span style="color:#f59e0b">T=${temp.toFixed(3)}</span> │ ` +
         `<span style="color:#94a3b8">var=${variance.toFixed(1)}</span> ▸ ` +
-        `<span style="color:#e2e8f0">gemini-2.5-flash config={ temperature: ${temp.toFixed(3)} }</span>`;
+        `<span style="color:#e2e8f0">${getSelectedModel()} config={ temperature: ${temp.toFixed(3)}${providerSelect.value === "ollama" ? ", apiKey: " + (getApiKey() ? "***set***" : "missing") : ""} }</span>`;
       logEl.prepend(entry);
       while (logEl.children.length > 25) logEl.removeChild(logEl.lastChild);
     }
